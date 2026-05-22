@@ -59,7 +59,7 @@ Each entry has three fields:
 - `replace` — auto-replacement (or `null` to flag only, no rewrite)
 - `severity` — `low` / `medium` / `high` (filter audits with `--min-severity`)
 
-Includes the full Originality.ai "Top 50" frequency list, the Wikipedia AI-tell catalog, and Walid's own bans. Banned punctuation: em dash `—`, en dash `–`.
+Detection covers the most common AI tells: stock phrases ("provide valuable insights", "left an indelible mark"), filler transitions ("Additionally", "Moreover", "Furthermore"), corporate verbs ("leverage", "delve", "showcase"), purple words ("tapestry", "labyrinth", "vibrant"), and en/em dashes. The list is opinionated — edit `patterns.json` to match your voice.
 
 ### Filter audits by severity
 
@@ -82,6 +82,17 @@ Use this in CI:
 ```bash
 slop words content/*.md && slop dashes content/*.md
 ```
+
+## Use it as a Claude / Cursor skill
+
+The `skill/` folder is a drop-in skill for Claude Code, Cursor, or any LLM agent.
+It contains the audit + rewrite playbook the CLI is built on. Two ways to use it:
+
+- Drop `skill/` into your agent's skills directory (e.g. `.claude/skills/anti-ai-slop/`)
+- Or read the markdown files yourself as a writing reference
+
+The references are the source of truth — the model uses its own judgment for the
+rewrite, the CLI handles the deterministic find/replace.
 
 ## License
 

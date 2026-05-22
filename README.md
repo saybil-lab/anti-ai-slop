@@ -47,11 +47,26 @@ slop replace post.md --dry-run
 
 ## What it catches
 
-Banned words (case-insensitive): `Additionally`, `leverage`, `delve`, `crucial`, `pivotal`, `showcase`, `underscore`, `emphasize`, `enhance`, `empower`, `foster`, `garner`, `comprehensive`, `holistic`, `seamlessly`, `robust solution`, `cutting-edge`, `game-changer`, `intricate`, `tapestry`, `landscape`, `vibrant`, `enduring`, `testament`, `serves as`, `stands as`, `It is worth noting`, `In conclusion`, `In summary`, `Let's explore`, `Here is your`, `As we can see`, and more.
+**478 banned words and phrases** loaded from `anti_ai_slop/patterns.json`. Edit the JSON to add, remove, or change replacements — no code changes needed.
 
-Banned punctuation: em dash `—`, en dash `–`.
+Each entry has three fields:
 
-Full list lives in `anti_ai_slop/patterns.py`.
+```json
+{ "text": "leverage", "replace": "use", "severity": "high" }
+```
+
+- `text` — the phrase to detect (case-insensitive, word-boundary matched)
+- `replace` — auto-replacement (or `null` to flag only, no rewrite)
+- `severity` — `low` / `medium` / `high` (filter audits with `--min-severity`)
+
+Includes the full Originality.ai "Top 50" frequency list, the Wikipedia AI-tell catalog, and Walid's own bans. Banned punctuation: em dash `—`, en dash `–`.
+
+### Filter audits by severity
+
+```bash
+slop words post.md --min-severity high   # only the worst offenders
+slop words post.md --min-severity medium # medium + high
+```
 
 ## Exit codes
 

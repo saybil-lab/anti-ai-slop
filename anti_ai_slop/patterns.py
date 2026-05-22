@@ -1,97 +1,31 @@
-"""Canonical forbidden words and patterns. Single source of truth."""
+"""Load AI-slop patterns from patterns.json. Single source of truth."""
+import json
+from pathlib import Path
 
-FORBIDDEN_WORDS = [
-    "Additionally",
-    "align with",
-    "crucial",
-    "delve",
-    "emphasizing",
-    "enduring",
-    "enhance",
-    "fostering",
-    "garner",
-    "highlight",
-    "interplay",
-    "intricate",
-    "intricacies",
-    "landscape",
-    "pivotal",
-    "showcase",
-    "tapestry",
-    "testament",
-    "underscore",
-    "valuable",
-    "vibrant",
-    "serves as",
-    "stands as",
-    "It is worth noting",
-    "rich tapestry",
-    "evolving landscape",
-    "seamlessly",
-    "leverage",
-    "empower",
-    "comprehensive",
-    "holistic",
-    "robust solution",
-    "cutting-edge",
-    "game-changer",
-    "In conclusion",
-    "In summary",
-    "Let's explore",
-    "Here is your",
-    "As we can see",
-]
+_DATA_PATH = Path(__file__).parent / "patterns.json"
 
+with _DATA_PATH.open(encoding="utf-8") as _f:
+    _DATA = json.load(_f)
+
+PUNCTUATION = _DATA.get("punctuation", {})
+PHRASES = _DATA.get("phrases", [])
+WORDS = _DATA.get("words", [])
+
+# Flat list of every term, for word-scan.
+ALL_TERMS = [item["text"] for item in PHRASES + WORDS]
+
+# Replacement dict, longest-first ordering preserved by caller. Skip null replacements.
 REPLACEMENTS = {
-    "Additionally,": "Also,",
-    "additionally,": "also,",
-    "leverage": "use",
-    "leveraging": "using",
-    "utilize": "use",
-    "utilizing": "using",
-    "delve into": "look at",
-    "delve": "look at",
-    "crucial": "key",
-    "pivotal": "key",
-    "showcase": "show",
-    "underscore": "show",
-    "emphasize": "show",
-    "emphasizing": "showing",
-    "enhance": "improve",
-    "enhancing": "improving",
-    "empower": "help",
-    "empowering": "helping",
-    "foster": "build",
-    "fostering": "building",
-    "garner": "get",
-    "comprehensive": "full",
-    "holistic": "whole",
-    "seamlessly": "cleanly",
-    "seamless": "clean",
-    "robust solution": "tool that works",
-    "cutting-edge": "new",
-    "game-changer": "shift",
-    "intricate": "detailed",
-    "intricacies": "details",
-    "tapestry": "mix",
-    "rich tapestry": "mix",
-    "evolving landscape": "shift",
-    "landscape": "space",
-    "vibrant": "active",
-    "enduring": "lasting",
-    "testament": "proof",
-    "serves as": "is",
-    "stands as": "is",
-    "It is worth noting that": "",
-    "It is worth noting": "",
-    "In conclusion,": "",
-    "In summary,": "",
-    "Let's explore": "Here's",
-    "Here is your": "Your",
-    "As we can see,": "",
+    item["text"]: item["replace"]
+    for item in PHRASES + WORDS
+    if item.get("replace") is not None
 }
 
+# Convenience: severity lookup.
+SEVERITY = {item["text"]: item.get("severity", "medium") for item in PHRASES + WORDS}
+
+# Legacy aliases.
+FORBIDDEN_WORDS = ALL_TERMS
 EM_DASH = "—"
 EN_DASH = "–"
-
-EM_DASH_REPLACEMENT = ", "
+EM_DASH_REPLACEMENT = PUNCTUATION.get(EM_DASH, ", ")

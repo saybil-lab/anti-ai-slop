@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anti-ai-slop"
-version = "0.1.0"
+version = "0.2.0"
 description = "CLI to detect and remove AI-slop words and em dashes."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -19,3 +19,6 @@ slop-replace = "anti_ai_slop.replace:main"
 
 [tool.setuptools.packages.find]
 include = ["anti_ai_slop*"]
+
+[tool.setuptools.package-data]
+anti_ai_slop = ["patterns.json"]

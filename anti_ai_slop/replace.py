@@ -7,17 +7,35 @@ from pathlib import Path
 from .patterns import REPLACEMENTS, EM_DASH, EN_DASH, EM_DASH_REPLACEMENT
 
 
+def _preserve_case(original: str, replacement: str) -> str:
+    if not original or not replacement:
+        return replacement
+    if original.isupper():
+        return replacement.upper()
+    if original[0].isupper():
+        return replacement[0].upper() + replacement[1:]
+    return replacement
+
+
 def replace_text(text: str, include_dashes: bool = True):
     changes = []
     out = text
-    # Longest keys first so multi-word phrases beat single words.
     for key in sorted(REPLACEMENTS, key=len, reverse=True):
         value = REPLACEMENTS[key]
-        pattern = re.compile(re.escape(key), re.IGNORECASE)
-        matches = pattern.findall(out)
-        if matches:
-            out = pattern.sub(value, out)
-            changes.append((key, value, len(matches)))
+        prefix = r"\b" if key[0].isalnum() else ""
+        suffix = r"\b" if key[-1].isalnum() else ""
+        pattern = re.compile(prefix + re.escape(key) + suffix, re.IGNORECASE)
+        count = 0
+
+        def _sub(match, _value=value):
+            nonlocal count
+            count += 1
+            return _preserve_case(match.group(0), _value)
+
+        new_out = pattern.sub(_sub, out)
+        if count:
+            out = new_out
+            changes.append((key, value, count))
     if include_dashes:
         em = out.count(EM_DASH)
         en = out.count(EN_DASH)

@@ -18,7 +18,11 @@ slop-dashes = "anti_ai_slop.check_dashes:main"
 slop-replace = "anti_ai_slop.replace:main"
 
 [tool.setuptools.packages.find]
+where = ["skill/scripts"]
 include = ["anti_ai_slop*"]
+
+[tool.setuptools.package-dir]
+"" = "skill/scripts"
 
 [tool.setuptools.package-data]
 anti_ai_slop = ["patterns.json"]

@@ -9,8 +9,12 @@ Built for the AY Automate `anti-ai-slop` skill. Use it to audit or rewrite Linke
 ```bash
 pip install .
 # or, no install
-python -m anti_ai_slop.cli words file.md
+PYTHONPATH=skill/scripts python -m anti_ai_slop.cli words file.md
 ```
+
+The Python package lives at `skill/scripts/anti_ai_slop/`. The `skill/` folder is
+self-contained — drop the whole thing into your agent's skills directory and you
+get the markdown playbook + the CLI scripts in one place.
 
 ## Commands
 

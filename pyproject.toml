@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anti-ai-slop"
+version = "0.1.0"
+description = "CLI to detect and remove AI-slop words and em dashes."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Walid Boulanouar" }]
+license = { text = "MIT" }
+
+[project.scripts]
+slop = "anti_ai_slop.cli:main"
+slop-words = "anti_ai_slop.check_words:main"
+slop-dashes = "anti_ai_slop.check_dashes:main"
+slop-replace = "anti_ai_slop.replace:main"
+
+[tool.setuptools.packages.find]
+include = ["anti_ai_slop*"]

@@ -75,6 +75,8 @@ If the text is in French, load `references/francais.md` in both modes and apply
 its bans instead of the English word list below (keep the structural bans: em
 dashes, rule of three, negative parallelism, emoji headers). Deterministic scan:
 `slop words <file> --lang fr` (or `SLOP_LANG=fr`). Write the diff log in French.
+House style for French output: straight quotes "…" (never « … »), and times
+written without a space (20h, 20h02, not 20 h / 20 h 02).
 
 ## The hard bans (apply to every output)
 

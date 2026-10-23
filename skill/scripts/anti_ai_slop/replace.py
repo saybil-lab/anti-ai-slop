@@ -1,10 +1,10 @@
 """Replace forbidden words using the replacement dictionary."""
 import argparse
-import re
 import sys
 from pathlib import Path
 
-from .patterns import REPLACEMENTS, EM_DASH, EN_DASH, EM_DASH_REPLACEMENT
+from .check_dashes import DASH_RE
+from .patterns import DEFAULT_LANG, LANGS, EM_DASH, EN_DASH, EM_DASH_REPLACEMENT, load, term_regex
 
 
 def _preserve_case(original: str, replacement: str) -> str:
@@ -17,14 +17,13 @@ def _preserve_case(original: str, replacement: str) -> str:
     return replacement
 
 
-def replace_text(text: str, include_dashes: bool = True):
+def replace_text(text: str, include_dashes: bool = True, lang: str = "en"):
+    _, replacements, _ = load(lang)
     changes = []
     out = text
-    for key in sorted(REPLACEMENTS, key=len, reverse=True):
-        value = REPLACEMENTS[key]
-        prefix = r"\b" if key[0].isalnum() else ""
-        suffix = r"\b" if key[-1].isalnum() else ""
-        pattern = re.compile(prefix + re.escape(key) + suffix, re.IGNORECASE)
+    for key in sorted(replacements, key=len, reverse=True):
+        value = replacements[key]
+        pattern = term_regex(key)
         count = 0
 
         def _sub(match, _value=value):
@@ -40,7 +39,7 @@ def replace_text(text: str, include_dashes: bool = True):
         em = out.count(EM_DASH)
         en = out.count(EN_DASH)
         if em or en:
-            out = out.replace(EM_DASH, EM_DASH_REPLACEMENT).replace(EN_DASH, EM_DASH_REPLACEMENT)
+            out = DASH_RE.sub(EM_DASH_REPLACEMENT, out)
             changes.append(("em/en dash", EM_DASH_REPLACEMENT.strip() or ",", em + en))
     return out, changes
 
@@ -51,11 +50,13 @@ def main(argv=None):
     ap.add_argument("--fix", action="store_true", help="Rewrite files in place.")
     ap.add_argument("--no-dashes", action="store_true", help="Skip em/en dash replacement.")
     ap.add_argument("--dry-run", action="store_true", help="Show changes, don't write.")
+    ap.add_argument("--lang", choices=LANGS, default=DEFAULT_LANG,
+                    help="Pattern list: en, fr or all (default: $SLOP_LANG or en).")
     args = ap.parse_args(argv)
 
     if not args.paths:
         text = sys.stdin.read()
-        new, changes = replace_text(text, include_dashes=not args.no_dashes)
+        new, changes = replace_text(text, include_dashes=not args.no_dashes, lang=args.lang)
         sys.stdout.write(new)
         for k, v, n in changes:
             print(f"  {n}x {k!r} -> {v!r}", file=sys.stderr)
@@ -67,7 +68,7 @@ def main(argv=None):
             print(f"skip (not a file): {p}", file=sys.stderr)
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
-        new, changes = replace_text(text, include_dashes=not args.no_dashes)
+        new, changes = replace_text(text, include_dashes=not args.no_dashes, lang=args.lang)
         if not changes:
             print(f"{path}: clean")
             continue

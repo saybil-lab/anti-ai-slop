@@ -1,9 +1,13 @@
 """Find and optionally replace em/en dashes."""
 import argparse
+import re
 import sys
 from pathlib import Path
 
 from .patterns import EM_DASH, EN_DASH, EM_DASH_REPLACEMENT
+
+# Swallow the spaces around the dash so "a — b" becomes "a, b", not "a ,  b".
+DASH_RE = re.compile(r"[ \t\u00a0\u202f]*[" + EM_DASH + EN_DASH + r"][ \t\u00a0\u202f]*")
 
 
 def scan_text(text: str):
@@ -15,7 +19,7 @@ def scan_text(text: str):
 
 
 def replace_text(text: str, replacement: str = EM_DASH_REPLACEMENT) -> str:
-    return text.replace(EM_DASH, replacement).replace(EN_DASH, replacement)
+    return DASH_RE.sub(replacement, text)
 
 
 def main(argv=None):

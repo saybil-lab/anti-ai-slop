@@ -25,4 +25,4 @@ include = ["anti_ai_slop*"]
 "" = "skill/scripts"
 
 [tool.setuptools.package-data]
-anti_ai_slop = ["patterns.json"]
+anti_ai_slop = ["patterns.json", "patterns_fr.json"]

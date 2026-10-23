@@ -1,13 +1,13 @@
 """Scan files or stdin for forbidden AI-slop words. Read-only audit."""
 import argparse
-import re
 import sys
 from pathlib import Path
 
-from .patterns import ALL_TERMS, SEVERITY
+from .patterns import DEFAULT_LANG, LANGS, load, term_regex
 
 
-def scan_text(text: str, min_severity: str = "low"):
+def scan_text(text: str, min_severity: str = "low", lang: str = "en"):
+    all_terms, _, severity = load(lang)
     rank = {"low": 0, "medium": 1, "high": 2}
     threshold = rank.get(min_severity, 0)
     hits = []
@@ -19,14 +19,11 @@ def scan_text(text: str, min_severity: str = "low"):
                 return True
         return False
 
-    for term in sorted(ALL_TERMS, key=len, reverse=True):
-        sev = SEVERITY.get(term, "medium")
+    for term in sorted(all_terms, key=len, reverse=True):
+        sev = severity.get(term, "medium")
         if rank.get(sev, 1) < threshold:
             continue
-        # If the term ends with punctuation, skip the trailing \b.
-        prefix = r"\b" if term[0].isalnum() else ""
-        suffix = r"\b" if term[-1].isalnum() else ""
-        pattern = re.compile(prefix + re.escape(term) + suffix, re.IGNORECASE)
+        pattern = term_regex(term)
         for match in pattern.finditer(text):
             if overlaps(match.start(), match.end()):
                 continue
@@ -56,12 +53,14 @@ def main(argv=None):
     ap.add_argument("--quiet", action="store_true", help="Only print files with hits.")
     ap.add_argument("--min-severity", choices=["low", "medium", "high"], default="low",
                     help="Filter hits by minimum severity.")
+    ap.add_argument("--lang", choices=LANGS, default=DEFAULT_LANG,
+                    help="Pattern list: en, fr or all (default: $SLOP_LANG or en).")
     args = ap.parse_args(argv)
 
     total = 0
     if not args.paths:
         text = sys.stdin.read()
-        hits = scan_text(text, args.min_severity)
+        hits = scan_text(text, args.min_severity, args.lang)
         total += len(hits)
         sys.stdout.write(format_hits(hits, "<stdin>"))
     else:
@@ -71,7 +70,7 @@ def main(argv=None):
                 print(f"skip (not a file): {p}", file=sys.stderr)
                 continue
             text = path.read_text(encoding="utf-8", errors="replace")
-            hits = scan_text(text, args.min_severity)
+            hits = scan_text(text, args.min_severity, args.lang)
             total += len(hits)
             if hits or not args.quiet:
                 sys.stdout.write(format_hits(hits, str(path)))

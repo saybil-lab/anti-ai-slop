@@ -18,6 +18,8 @@ description: |
   - "rewrite without AI words" / "scrub the AI from this"
   - "anti-ai" / "anti-slop" / "no slop"
   - "check this for AI tells" / "audit this copy"
+  - En français : "dé-IA-ise ce texte" / "rends-le plus humain" / "est-ce que ça sonne IA ?"
+    / "enlève les tics IA" / "audite ce texte" / "anti-slop"
   - Before publishing any external copy (LP, email, proposal, post) as a final gate
   - When another skill (design-ui, content, proposal, linkedin-hooks) is about to return copy
 ---
@@ -42,6 +44,7 @@ is your call.
 | `references/quick-scan-checklist.md` | Fast in-flight checklist — load for short copy (under 200 words) |
 | `references/replacement-table.md` | Find/replace dictionary for the most common AI phrases |
 | `references/by-medium.md` | Medium-specific rules: LP, email, DM, LinkedIn post, proposal, docs, microcopy |
+| `references/francais.md` | French tells and structures. **Load it whenever the input is in French**; the English word bans do not apply as-is |
 
 ## How to run
 
@@ -65,6 +68,13 @@ is your call.
    - The rewritten text
    - A short diff log: 5–10 bullet points listing what changed and which rule fired
    - A self-check confirming zero forbidden words remain
+
+## French input
+
+If the text is in French, load `references/francais.md` in both modes and apply
+its bans instead of the English word list below (keep the structural bans: em
+dashes, rule of three, negative parallelism, emoji headers). Deterministic scan:
+`slop words <file> --lang fr` (or `SLOP_LANG=fr`). Write the diff log in French.
 
 ## The hard bans (apply to every output)
 
